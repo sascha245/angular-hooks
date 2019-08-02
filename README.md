@@ -1,6 +1,6 @@
 # angular-hooks
 
-Use [Vue Function API](https://github.com/vuejs/rfcs/blob/function-apis/active-rfcs/0000-function-api.md) in Angular.
+Use [Vue Function API](https://github.com/vuejs/rfcs/blob/function-apis/active-rfcs/0000-function-api.md) equivalent in Angular.
 
 **Warning**: This is currently still experimental and unstable.
 
@@ -58,7 +58,7 @@ Dynamic lifecycles:
 
 ### <a name="example-setup"></a> Setup
 
-`value` returns a new Wrapper with the given initial value.
+- `value` returns a new Wrapper with the given initial value.
 
 ```ts
 import { value, UseHooks } from 'angular-hooks'
@@ -84,8 +84,8 @@ export class MyComponent extends UseHooks<MyComponent> {
 
 ### <a name="example-inputs"></a> Reactive inputs
 
-`observe` turns a property on the given object into a reactive Wrapper.
-`computed` automatically recomputes it's value if one of it's dependencies has changed. It will also only recompute it's value when needed.
+- `observe` turns a property on the given object into a reactive Wrapper.
+- `computed` automatically recomputes it's value if one of it's dependencies has changed. It will also only recompute it's value when needed.
 
 ```ts
 import { observe, computed, UseHooks } from 'angular-hooks'
@@ -121,13 +121,13 @@ export class MyComponent extends UseHooks<MyComponent> {
 
 ### <a name="example-route"></a> Watch route
 
-`provide` makes use of Angulars `Injector` to get the appropriate provider.
-`fromObservable` turns an RxJs observable into a Wrapper.
-`asObservable` turns a Wrapper into an RxJs observable.
-`watch` observes a Wrapper and triggers the handler each time the Wrapper changes. Automatically unsubscribes when the component is destroyed.
+- `provide` makes use of Angulars `Injector` to get the appropriate provider.
+- `fromObservable` turns an RxJs observable into a Wrapper.
+- `asObservable` turns a Wrapper into an RxJs observable.
+- `watch` observes a Wrapper and triggers the handler each time the Wrapper changes. Automatically unsubscribes when the component is destroyed.
 
 ```ts
-import { provide, watch, fromObservable, UseHooks } from 'angular-hooks'
+import { value, provide, watch, fromObservable, UseHooks } from 'angular-hooks'
 import { ActivatedRoute } from '@angular/router';
 
 function useRoute() {
