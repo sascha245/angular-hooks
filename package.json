@@ -1,0 +1,40 @@
+{
+  "name": "angular-hooks",
+  "version": "0.0.0",
+  "description": "Vue composition functions in Angular",
+  "main": "dist/index.common.js",
+  "module": "dist/index.esm.js",
+  "typings": "dist/types/index.d.ts",
+  "files": ["dist"],
+  "repository": "https://github.com/sascha245/angular-hooks",
+  "license": "MIT",
+  "keywords": [
+    "angular",
+    "hooks",
+    "dynamic lifecycles",
+    "function api",
+    "composition functions"
+  ],
+  "scripts": {
+    "clean": "rimraf dist .rpt2_cache",
+    "build": "npm run clean && rollup -c",
+    "test:unit": "echo 'TODO'",
+    "validate": "npm run build && npm run test:unit && npm pack --dry-run"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jest": "^23.1.4",
+    "rimraf": "^2.6.2",
+    "rollup": "^0.67.3",
+    "rollup-plugin-typescript2": "^0.18.0",
+    "ts-jest": "^23.0.0",
+    "tslint-config-prettier": "^1.15.0",
+    "typescript": "^3.0.0",
+    "rxjs": "^6.3.3",
+    "@angular/core": "^6.0.0"
+  },
+  "peerDependencies": {
+    "rxjs": "^6.3.3",
+    "@angular/core": "^6.0.0"
+  }
+}
