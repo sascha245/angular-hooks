@@ -1,8 +1,14 @@
 # angular-hooks
 
-Use [Vue Function API](https://github.com/vuejs/rfcs/blob/function-apis/active-rfcs/0000-function-api.md) equivalent in Angular.
+Use [Vue Function API](https://github.com/vuejs/rfcs/blob/function-apis/active-rfcs/0000-function-api.md) equivalent in Angular to enable composition functions in components:
+- Better logical decomposition
+- Reusable logic
+- Can imitate inheritance but without its inconvenients
 
 **Warning**: This is currently still experimental and unstable.
+
+Though it is concerning Vue, here a comment from *Evan You* explaining the main advantages of composition functions.
+https://github.com/vuejs/rfcs/issues/55#issuecomment-504875870
 
 ## TODO
 
@@ -212,6 +218,96 @@ export class MyComponent extends UseHooks<MyComponent> {
 ```html
 <p>{{ $data.x.value }} - {{ $data.y.value }}</p>
 ```
+
+### How to replace inheritance
+
+With inheritance:
+```ts
+class BaseComponent {
+  public findData: any | undefined;
+  public findError: Error | undefined;
+
+  constructor(protected readonly myService: MyService) {}
+  
+  ngOnInit() {
+    this.fetchData();
+  }
+  
+  fetchData() {
+    this.findError = undefined;
+    this.myService.find().subscribe({
+      next: (data: any) => {
+         this.findData = data;
+      },
+      error: (err: any) => {
+        this.findError = err;
+      }
+    })
+  }
+}
+
+@Component({
+  // ...
+})
+class MyComponent extends BaseComponent {
+  ...
+}
+```
+
+With hooks:
+```
+function useAsync<T>(fn: () => Observable<T>) {
+  const data = value<T|undefined>(undefined);
+  const error = value<any|undefined>(undefined);
+  
+  const execute = () => {
+    error.value = undefined;
+    fn().subscribe({
+      next: (result: T) => {
+         data.value = result;
+      },
+      error: (err: any) => {
+        error.value = err;
+      }
+    })
+  }
+  
+  return {
+    data,
+    error,
+    execute
+  }
+}
+
+function useMyServiceFind() {
+  const myService = provide(MyService);
+  return useAsync(() => myService.find());
+}
+
+@Component({
+  // ...
+})
+export class MyComponent extends UseHooks<MyComponent> {
+
+  ngHooks() {
+    const { data: findData, error: findError, execute: fetchData } = useMyServiceFind();
+    
+    onInit(() => {
+      fetchData();
+    })
+
+    return {
+      findData,
+      findError,
+      fetchData
+    };
+  }
+}
+```
+
+Advantages:
+- Better visibility about what happens in your component
+- `useAsync` is completely reusable
 
 ## License
 
