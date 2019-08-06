@@ -290,7 +290,12 @@ function useMyServiceFind() {
 export class MyComponent extends UseHooks<MyComponent> {
 
   ngHooks() {
+    // With useMyServiceFind()
     const { data: findData, error: findError, execute: fetchData } = useMyServiceFind();
+    
+    // Without useMyServiceFind()
+    const myService = provide(MyService);
+    const { data: findData, error: findError, execute: fetchData } = useAsync(() => myService.find());
     
     onInit(() => {
       fetchData();
