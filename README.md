@@ -255,7 +255,7 @@ class MyComponent extends BaseComponent {
 ```
 
 With hooks:
-```
+```ts
 function useAsync<T>(fn: () => Observable<T>) {
   const data = value<T|undefined>(undefined);
   const error = value<any|undefined>(undefined);
