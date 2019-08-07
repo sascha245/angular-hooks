@@ -1,22 +1,23 @@
 # angular-hooks
 
-Use [Vue Function API](https://github.com/vuejs/rfcs/blob/function-apis/active-rfcs/0000-function-api.md) equivalent in Angular to enable composition functions in components:
-- Better logical decomposition
-- Reusable logic
-- Can imitate inheritance but without its inconvenients
+Use [Vue Function API](https://github.com/vuejs/rfcs/blob/function-apis/active-rfcs/0000-function-api.md) equivalent in Angular to enable composition functions in components and providers:
+- Easier synchroneous observables, including computed values with automatic dependency detection.
+- Dynamic lifecycle hooks
+- Automatic observable unsubscription with `subscribe` and `watch`.
+- Better logical decomposition and code reusability
 
 **Warning**: This is currently still experimental and unstable.
-
-Though it is concerning Vue, here a comment from *Evan You* explaining the main advantages of composition functions.
-https://github.com/vuejs/rfcs/issues/55#issuecomment-504875870
 
 ## TODO
 
 - `state` function & unwrapping of wrappers in template
+
 - add options `watch` to choose update mode:
   - `sync`: call watch handler synchroneously when a dependency has changed.
   - `pre`: call watch handler before rerendering
   - `post`: call watch handler after rerendering
+
+- rename `this.$data`?
 
 ## Install
 
@@ -219,92 +220,65 @@ export class MyComponent extends UseHooks<MyComponent> {
 <p>{{ $data.x.value }} - {{ $data.y.value }}</p>
 ```
 
-### How to replace inheritance
+### useAsync
 
-With inheritance:
+First create our `useAsync` function. This function will return an observable `data` and `error` object, as well as an `execute` function to launch the asynchroneous operation.
+
 ```ts
-class BaseComponent {
-  public findData: any | undefined;
-  public findError: Error | undefined;
-
-  constructor(protected readonly myService: MyService) {}
-  
-  ngOnInit() {
-    this.fetchData();
-  }
-  
-  fetchData() {
-    this.findError = undefined;
-    this.myService.find().subscribe({
-      next: (data: any) => {
-         this.findData = data;
-      },
-      error: (err: any) => {
-        this.findError = err;
-      }
-    })
-  }
-}
-
-@Component({
-  // ...
-})
-class MyComponent extends BaseComponent {
-  ...
-}
-```
-
-With hooks:
-```ts
-function useAsync<T>(fn: () => Observable<T>) {
+function useAsync<T = any>(fn: () => Promise<T>) {
+  const loading = value<boolean>(false);
   const data = value<T|undefined>(undefined);
   const error = value<any|undefined>(undefined);
   
-  const execute = () => {
+  const execute = async () => {
     error.value = undefined;
-    fn().subscribe({
-      next: (result: T) => {
-         data.value = result;
-      },
-      error: (err: any) => {
-        error.value = err;
-      }
-    })
+    loading.value = true;
+    try {
+      data.value = await fn();
+    } catch (err) {
+      error.value = err;
+    }
+    loading.value = false;
   }
   
   return {
+    loading,
     data,
     error,
     execute
   }
 }
+```
 
-function useMyServiceFind() {
-  const myService = provide(MyService);
-  return useAsync(() => myService.find());
-}
-
+You can then reuse it as you like in your components.
+```ts
 @Component({
   // ...
 })
 export class MyComponent extends UseHooks<MyComponent> {
 
   ngHooks() {
-    // With useMyServiceFind()
-    const { data: findData, error: findError, execute: fetchData } = useMyServiceFind();
-    
-    // Without useMyServiceFind()
+    const route = useRoute();
+    const id = computed(() => route.params.value.id);
+  
     const myService = provide(MyService);
     const { data: findData, error: findError, execute: fetchData } = useAsync(() => myService.find());
+    const { error: editError, execute: editData } = useAsync(() => myService.edit(id.value));
     
-    onInit(() => {
-      fetchData();
+    // findError is an observable wrapper, so you can use it with computed or watch.
+    const findErrorCode = computed(() => findError.value.code);
+    
+    onInit(async () => {
+      await fetchData();
     })
-
+    
     return {
       findData,
-      findError,
-      fetchData
+      findErrorCode,
+      fetchData,
+      
+      editError,
+      editData
     };
   }
 }
